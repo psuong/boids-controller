@@ -33,6 +33,8 @@ namespace Boid {
         }
 
         private void Update() {
+            // The rules are essentially Vector3 components
+            Vector3 alignment, cohesion, separation;
         }
 
         private void Spawn() {
