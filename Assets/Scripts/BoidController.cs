@@ -6,13 +6,20 @@ using UnityEngine.AI;
 namespace Boid {
 
     public class BoidController : MonoBehaviour {
+        [Header("Spawning Properties")]
+        public GameObject boidPrefab;
+        public Vector3 spawnPosition;
+        public Transform parent;
+        public bool isBoidParented;
+
         [Header("Flock Properties")]
         [Tooltip("How fast does each boid move?")]
         public float speed = 10f;
         [Tooltip("How fast does each boid turn?")]
         public float angularSpeed = 120f;
         [Tooltip("What is the minimum distance for a boid to be an adjacent neighbor?")]
-        public float neighborDistance = 5f;
+        public float neighborDistance = 50f;
+        public float lookAheadDistance = 5f;
         [Tooltip("What is the size of the flock?")]
         public uint flockSize = 10;
 
@@ -31,7 +38,13 @@ namespace Boid {
             // Initialize the agents and the transforms
             boids = new NavMeshAgent[flockSize];
             transforms = new Transform[flockSize];
-
+            
+            for (int i = 0; i < flockSize; i++) {
+                Vector3 position = new Vector3(Random.Range(-spawnPosition.x, spawnPosition.x), Random.Range(-spawnPosition.y, spawnPosition.y), Random.Range(-spawnPosition.z, spawnPosition.z));
+                GameObject boid = (isBoidParented) ? Instantiate(boidPrefab, position, Quaternion.identity, parent) as GameObject: Instantiate(boidPrefab, position, Quaternion.identity) as GameObject;
+                boids[i] = boid.GetComponent<NavMeshAgent>();
+                transforms[i] = boid.transform;
+            }
         }
 
         private void Update() {
@@ -40,6 +53,13 @@ namespace Boid {
                 Vector3 alignment, cohesion, separation;
                 // Set the flock parameters
                 SetFlockParameters(i, out alignment, out cohesion, out separation);
+
+                Vector3 velocity = alignment * alignmentWeight + cohesion * cohesionWeight + separation * separationWeight;
+                Vector3 destination = transforms[i].position + velocity * lookAheadDistance;
+                if (!CanSetDestination(i, destination)) {
+                    velocity *= -1;
+                    CanSetDestination(i, destination);
+                }
             }
         }
 
@@ -62,8 +82,15 @@ namespace Boid {
             if (neighborCount == 0) { return; }
             // Normalize the vector components
             alignment = (alignment / neighborCount).normalized;
-            cohesion = (cohesion / neighborCount).normalized;
-            separation = (separation / neighborCount).normalized;
+            cohesion = ((cohesion / neighborCount) - boidTransform.position).normalized;
+            separation = ((separation / neighborCount) * -1).normalized;
+        }
+
+        private bool CanSetDestination(int index, Vector3 target) {
+            if (boids[index].destination == target) {
+                return true;
+            }
+            return boids[index].SetDestination(target);
         }
     }
 }
