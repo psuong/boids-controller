@@ -6,6 +6,11 @@ using UnityEngine.AI;
 namespace Boid {
 
     public class BoidController : MonoBehaviour {
+        
+        // Accessors
+        public NavMeshAgent[] Boids { get { return boids; } }
+        public Transform[] Transforms { get { return transforms; } }
+
         [Header("Spawning Properties")]
         public GameObject boidPrefab;
         public Vector3 spawnPosition;
@@ -31,8 +36,14 @@ namespace Boid {
         [Tooltip("What is the likelihood for the agents to be further apart?")]
         public float separationWeight = 0.6f;
 
-        private NavMeshAgent[] boids;
-        private Transform[] transforms;
+#if UNITY_EDITOR
+        [Header("Debug Options")]
+        public Color destinationColor = new Color(1f, 0f, 0f, 0.25f);
+        public Color desiredVelocityColor = new Color(0f, 0f, 1f, 0.25f);
+#endif
+
+        private NavMeshAgent[] boids; // A private array containing references to all of the boids
+        private Transform[] transforms; // A private aray referencing the Transform information of the boids
 
         private void Start() {
             // Initialize the agents and the transforms
