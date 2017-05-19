@@ -61,6 +61,19 @@ public class BoidGUI : MonoBehaviour {
         BoidController.separationWeight = SetValue(text);
     }
 
+    public void SetFlockSize(string text) {
+        uint flockSize = (uint)SetValue(text);
+        BoidController.flockSize = flockSize;
+    }
+
+    public void SetNeighborDistance(string text) {
+        BoidController.neighborDistance = SetValue(text);
+    }
+
+    public void SetViewDistance(string text) {
+        BoidController.lookAheadDistance = SetValue(text);
+    }
+
     public void StartDemo() {
         if (OnInitEvent != null) {
             OnInitEvent();
