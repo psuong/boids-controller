@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Linq;
 
 namespace Boid {
 
@@ -53,18 +54,39 @@ namespace Boid {
             BoidGUI.OnInitEvent -= Invoke;
         }
 
+        private void Start() {
+            // Initialize with 0
+            boids = new NavMeshAgent[0];
+            transforms = new Transform[0];
+        }
+
         // Use this to start the simulation
         private void Invoke() {
-            // Initialize the agents and the transforms
-            boids = new NavMeshAgent[flockSize];
-            transforms = new Transform[flockSize];
+            if (boids.Length == 0) {
+                // Initialize the agents and the transforms
+                boids = new NavMeshAgent[flockSize];
+                transforms = new Transform[flockSize];
 
-            for (int i = 0; i < flockSize; i++) {
-                Vector3 position = new Vector3(Random.Range(-spawnPosition.x, spawnPosition.x), Random.Range(-spawnPosition.y, spawnPosition.y), Random.Range(-spawnPosition.z, spawnPosition.z));
-                GameObject boid = (isBoidParented) ? Instantiate(boidPrefab, position, Quaternion.identity, parent) as GameObject : Instantiate(boidPrefab, position, Quaternion.identity) as GameObject;
-                boids[i] = boid.GetComponent<NavMeshAgent>();
-                transforms[i] = boid.transform;
+                for (int i = 0; i < flockSize; i++) {
+                    Vector3 position = new Vector3(Random.Range(-spawnPosition.x, spawnPosition.x), Random.Range(-spawnPosition.y, spawnPosition.y), Random.Range(-spawnPosition.z, spawnPosition.z));
+                    GameObject boid = (isBoidParented) ? Instantiate(boidPrefab, position, Quaternion.identity, parent) as GameObject : Instantiate(boidPrefab, position, Quaternion.identity) as GameObject;
+                    boids[i] = boid.GetComponent<NavMeshAgent>();
+                    transforms[i] = boid.transform;
+                }
+            } else {
+                NavMeshAgent[] boids = new NavMeshAgent[flockSize];
+                Transform[] transforms = new Transform[flockSize];
+                for (int i = 0; i < flockSize; i++) {
+                    Vector3 position = new Vector3(Random.Range(-spawnPosition.x, spawnPosition.x), Random.Range(-spawnPosition.y, spawnPosition.y), Random.Range(-spawnPosition.z, spawnPosition.z));
+                    GameObject boid = (isBoidParented) ? Instantiate(boidPrefab, position, Quaternion.identity, parent) as GameObject : Instantiate(boidPrefab, position, Quaternion.identity) as GameObject;
+                    boids[i] = boid.GetComponent<NavMeshAgent>();
+                    transforms[i] = boid.transform;
+                }
+
+                this.boids = this.boids.Concat(boids).ToArray();
+                this.transforms = this.transforms.Concat(Transforms).ToArray();
             }
+
         }
 
 
@@ -83,7 +105,8 @@ namespace Boid {
                         CanSetDestination(i, destination);
                     }
                 }
-            } catch (System.NullReferenceException err) {
+            }
+            catch (System.NullReferenceException err) {
 
             }
         }
