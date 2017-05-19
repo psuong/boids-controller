@@ -6,7 +6,7 @@ using UnityEngine.AI;
 namespace Boid {
 
     public class BoidController : MonoBehaviour {
-        
+
         // Accessors
         public NavMeshAgent[] Boids { get { return boids; } }
         public Transform[] Transforms { get { return transforms; } }
@@ -45,32 +45,46 @@ namespace Boid {
         private NavMeshAgent[] boids; // A private array containing references to all of the boids
         private Transform[] transforms; // A private aray referencing the Transform information of the boids
 
-        private void Start() {
+        private void OnEnable() {
+            BoidGUI.OnInitEvent += Invoke;
+        }
+
+        private void OnDisable() {
+            BoidGUI.OnInitEvent -= Invoke;
+        }
+
+        // Use this to start the simulation
+        private void Invoke() {
             // Initialize the agents and the transforms
             boids = new NavMeshAgent[flockSize];
             transforms = new Transform[flockSize];
-            
+
             for (int i = 0; i < flockSize; i++) {
                 Vector3 position = new Vector3(Random.Range(-spawnPosition.x, spawnPosition.x), Random.Range(-spawnPosition.y, spawnPosition.y), Random.Range(-spawnPosition.z, spawnPosition.z));
-                GameObject boid = (isBoidParented) ? Instantiate(boidPrefab, position, Quaternion.identity, parent) as GameObject: Instantiate(boidPrefab, position, Quaternion.identity) as GameObject;
+                GameObject boid = (isBoidParented) ? Instantiate(boidPrefab, position, Quaternion.identity, parent) as GameObject : Instantiate(boidPrefab, position, Quaternion.identity) as GameObject;
                 boids[i] = boid.GetComponent<NavMeshAgent>();
                 transforms[i] = boid.transform;
             }
         }
 
-        private void Update() {
-            for (int i = 0; i < boids.Length; ++i) {
-                // The rules are essentially Vector3 components
-                Vector3 alignment, cohesion, separation;
-                // Set the flock parameters
-                SetFlockParameters(i, out alignment, out cohesion, out separation);
 
-                Vector3 velocity = alignment * alignmentWeight + cohesion * cohesionWeight + separation * separationWeight;
-                Vector3 destination = transforms[i].position + velocity * lookAheadDistance;
-                if (!CanSetDestination(i, destination)) {
-                    velocity *= -1;
-                    CanSetDestination(i, destination);
+        private void Update() {
+            try {
+                for (int i = 0; i < boids.Length; ++i) {
+                    // The rules are essentially Vector3 components
+                    Vector3 alignment, cohesion, separation;
+                    // Set the flock parameters
+                    SetFlockParameters(i, out alignment, out cohesion, out separation);
+
+                    Vector3 velocity = alignment * alignmentWeight + cohesion * cohesionWeight + separation * separationWeight;
+                    Vector3 destination = transforms[i].position + velocity * lookAheadDistance;
+                    if (!CanSetDestination(i, destination)) {
+                        velocity *= -1;
+                        CanSetDestination(i, destination);
+                    }
                 }
+            } catch (System.NullReferenceException err) {
+
             }
         }
 
