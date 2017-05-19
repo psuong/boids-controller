@@ -119,7 +119,7 @@ namespace Boid {
             for (int i = 0; i < boids.Length; ++i) {
                 if (i != index) {
                     if (Vector3.Magnitude(transforms[i].position - boidTransform.position) < neighborDistance) {
-                        alignment += boids[i].velocity;
+                        alignment += boids[i].desiredVelocity;
                         cohesion += transforms[i].position;
                         separation += transforms[i].position - boidTransform.position;
                         neighborCount++;
