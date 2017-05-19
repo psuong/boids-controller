@@ -4,4 +4,7 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Boid_Controller_Obstacle.unity
+    guid: cc968f3dc05120f4ba46e6be0d255ba8
